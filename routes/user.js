@@ -16,7 +16,7 @@ router.post("/user/signup", async (req, res) => {
     }
     const salt = uid2(16);
     const hash = SHA256(req.body.password + salt).toString(encBase64);
-    const token = uid2(16);
+    const token = uid2(64);
     const newUser = new User({
       email: req.body.email,
       account: {

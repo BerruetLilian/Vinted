@@ -10,8 +10,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "cloudinary": "^2.8.0",
     "crypto-js": "^4.2.0",
     "express": "^5.1.0",
+    "express-fileupload": "^1.5.2",
     "mongoose": "^8.19.2",
     "uid2": "^1.0.0"
   }
