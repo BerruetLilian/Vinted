@@ -31,15 +31,18 @@ router.post(
         product_description: req.body.description,
         product_price: req.body.price,
         product_details: details,
+        product_image: null,
         owner: req.user._id,
       });
-      const pictureToUpload = convertToBase64(req.files.picture);
+      if (req.files.picture) {
+        const pictureToUpload = convertToBase64(req.files.picture);
 
-      const result = await cloudinary.uploader.upload(pictureToUpload, {
-        asset_folder: "/vinted/offers/",
-        display_name: newOffer._id,
-      });
-      newOffer.product_image = result;
+        const result = await cloudinary.uploader.upload(pictureToUpload, {
+          asset_folder: "/vinted/offers/",
+          display_name: newOffer._id,
+        });
+        newOffer.product_image = result;
+      }
       await newOffer.save();
       res.json({
         _id: newOffer._id,
