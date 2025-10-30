@@ -34,7 +34,7 @@ router.post(
         product_image: null,
         owner: req.user._id,
       });
-      if (req.files.picture) {
+      if (req.files && req.files.picture) {
         const pictureToUpload = convertToBase64(req.files.picture);
 
         const result = await cloudinary.uploader.upload(pictureToUpload, {
@@ -91,7 +91,7 @@ router.put("/offer/:id", fileUpload(), isAuthenticated, async (req, res) => {
     offer.product_price = req.body.price;
     offer.product_details = details;
 
-    if (req.files.picture.md5 !== offer.product_image.etag) {
+    if (req.files && req.files.picture.md5 !== offer.product_image.etag) {
       const pictureToUpload = convertToBase64(req.files.picture);
       await cloudinary.uploader.destroy(offer.product_image.public_id);
       const result = await cloudinary.uploader.upload(pictureToUpload, {
@@ -131,6 +131,58 @@ router.delete("/offer/:id", isAuthenticated, async (req, res) => {
     await cloudinary.uploader.destroy(offer.product_image.public_id);
     await offer.deleteOne();
     res.json({ message: "Offer deleted" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "server error", error: error.messsage });
+  }
+});
+
+router.get("/offers", async (req, res) => {
+  try {
+    const { title, priceMin, priceMax, sort, page } = req.query;
+    const filter = {};
+    let sortFilter;
+    let limit = 3;
+    let skip = 0;
+    if (title) {
+      filter.product_name = new RegExp(title, "i");
+    }
+    if (priceMin && !priceMax) {
+      filter.product_price = { $gte: priceMin };
+    } else if (!priceMin && priceMax) {
+      filter.product_price = { $lte: priceMax };
+    } else if (priceMin && priceMax) {
+      filter.product_price = { $gte: priceMin, $lte: priceMax };
+    }
+    if (sort === "price-desc") {
+      sortFilter = { product_price: "desc" };
+    }
+    if (sort === "price-asc") {
+      sortFilter = { product_price: "asc" };
+    }
+    if (page) {
+      skip = 3 * (page - 1);
+    }
+    console.log(sortFilter);
+    const offers = await Offer.find(filter)
+      .sort(sortFilter)
+      .limit(limit)
+      .skip(skip);
+    const count = await Offer.countDocuments(filter);
+    res.json({ count: count, offers: offers });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "server error", error: error.messsage });
+  }
+});
+
+router.get("/offer/:id", async (req, res) => {
+  try {
+    const offer = await Offer.findById(req.params.id).populate(
+      "owner",
+      "account"
+    );
+    res.json(offer);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "server error", error: error.messsage });
