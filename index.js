@@ -25,6 +25,6 @@ app.all(/.*/, (req, res) => {
   res.status(404).json({ message: "Route not found" });
 });
 
-app.listen(process.env.SERVER_PORT, () => {
+app.listen(process.env.PORT, () => {
   console.log("server started !");
 });
