@@ -1,17 +1,19 @@
+require("dotenv").config();
+
 const mongoose = require("mongoose");
-mongoose.connect(
-  "mongodb+srv://Berruet:26092014@cluster0.akbdjcd.mongodb.net/Vinted"
-);
+mongoose.connect(process.env.MONGODB_URI);
 const cloudinary = require("cloudinary").v2;
 cloudinary.config({
-  cloud_name: "dhzintwet",
-  api_key: "838434795284545",
-  api_secret: "11PqMG_bClMfqWDXQKO-dGvDSs4",
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+const cors = require("cors");
 const express = require("express");
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 const userRouter = require("./routes/user");
 app.use(userRouter);
@@ -23,6 +25,6 @@ app.all(/.*/, (req, res) => {
   res.status(404).json({ message: "Route not found" });
 });
 
-app.listen(3000, () => {
+app.listen(process.env.SERVER_PORT, () => {
   console.log("server started !");
 });

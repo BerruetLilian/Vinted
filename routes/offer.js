@@ -161,10 +161,10 @@ router.get("/offers", async (req, res) => {
       sortFilter = { product_price: "asc" };
     }
     if (page) {
-      skip = 3 * (page - 1);
+      skip = limit * (page - 1);
     }
-    console.log(sortFilter);
     const offers = await Offer.find(filter)
+      .populate("owner", "account")
       .sort(sortFilter)
       .limit(limit)
       .skip(skip);
